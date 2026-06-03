@@ -14,7 +14,7 @@ public class ObjectSpawner : MonoBehaviour
         InvokeRepeating(nameof(SpawnObject), 0f, spawnInterval);
     }
 
-    void SpawnObject()
+    public void SpawnObject()
     {
         if (spawnA)
         {
@@ -25,6 +25,6 @@ public class ObjectSpawner : MonoBehaviour
             Instantiate(objectB, transform.position, Quaternion.identity);
         }
 
-        spawnA = !spawnA; // Wissel tussen A en B
+        spawnA = !spawnA;
     }
 }
