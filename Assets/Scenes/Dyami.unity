@@ -14652,10 +14652,10 @@ MonoBehaviour:
   selectedJoint: 
   selectedIndex: 0
   control: 0
-  stiffness: 0
+  stiffness: 100
   damping: 0
-  forceLimit: 0
-  speed: 5
+  forceLimit: 100
+  speed: 100
   torque: 100
   acceleration: 5
   highLightColor: {r: 1, g: 0, b: 0, a: 1}
