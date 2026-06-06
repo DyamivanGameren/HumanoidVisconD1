@@ -1,0 +1,73 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1780683406",
+        "python_version": "3.10.12 | packaged by Anaconda, Inc. | (main, Jul  5 2023, 19:01:18) [MSC v.1916 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\dyami\\anaconda3\\envs\\mlagents\\Scripts\\mlagents-learn humanoidrobot.yaml --run-id=humanoidrobot.yaml --force",
+        "mlagents_version": "1.1.0",
+        "mlagents_envs_version": "1.1.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.2.2+cu121",
+        "numpy_version": "1.23.5",
+        "end_time_seconds": "1780683689"
+    },
+    "total": 282.7851152999792,
+    "count": 1,
+    "self": 0.00594389985781163,
+    "children": {
+        "run_training.setup": {
+            "total": 0.09264310006983578,
+            "count": 1,
+            "self": 0.09264310006983578
+        },
+        "TrainerController.start_learning": {
+            "total": 282.6865283000516,
+            "count": 1,
+            "self": 0.0005126000614836812,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 11.572515000007115,
+                    "count": 1,
+                    "self": 11.572515000007115
+                },
+                "TrainerController.advance": {
+                    "total": 270.8853063000133,
+                    "count": 1,
+                    "self": 3.4100026823580265e-05,
+                    "children": {
+                        "env_step": {
+                            "total": 270.8852721999865,
+                            "count": 1,
+                            "self": 270.8852678000694,
+                            "children": {
+                                "SubprocessEnvManager._take_step": {
+                                    "total": 4.399917088449001e-06,
+                                    "count": 1,
+                                    "self": 4.399917088449001e-06
+                                }
+                            }
+                        }
+                    }
+                },
+                "trainer_threads": {
+                    "total": 8.00006091594696e-07,
+                    "count": 1,
+                    "self": 8.00006091594696e-07
+                },
+                "TrainerController._save_models": {
+                    "total": 0.2281935999635607,
+                    "count": 1,
+                    "self": 0.036090999958105385,
+                    "children": {
+                        "RLTrainer._checkpoint": {
+                            "total": 0.19210260000545532,
+                            "count": 1,
+                            "self": 0.19210260000545532
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -7,6 +7,7 @@ TagManager:
   - robot
   - target
   - agent
+  - k_Ground
   layers:
   - Default
   - TransparentFX

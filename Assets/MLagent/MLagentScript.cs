@@ -1,3 +1,4 @@
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.MLAgents;
@@ -7,30 +8,35 @@ using Unity.MLAgentsExamples;
 
 public class HumanoidArticulationAgent : Agent
 {
+    [Header("Robot Root")]
+    public GameObject robotRoot;
+
     [Header("Root Body")]
     public ArticulationBody pelvis;
 
     [Header("Goal")]
     public Transform target;
 
-    [Header("ML Agents Helpers")]
+    [Header("Helpers")]
     public OrientationCubeController orientationCube;
     public DirectionIndicator directionIndicator;
 
     [Header("Joint Settings")]
-    public float forceLimit = 100f;
+    public float forceLimit = 1000f;
     public float friction = 10f;
 
     [Header("Training")]
     public float targetRadius = 1f;
-    public float spawnRadius = 9f;
+    public float spawnRadius = 0f;
+
+    [Header("Action Settings")]
+    public float actionRange = 20f;
 
     [Header("Controllable Joints")]
     [SerializeField]
-    private List<ArticulationBody> controllableJoints =
-        new List<ArticulationBody>();
+    private List<ArticulationBody> controllableJoints = new();
 
-    private List<float> startDriveTargets = new List<float>();
+    private List<float> standingPoseTargets = new();
 
     private Vector3 startPosition;
     private Quaternion startRotation;
@@ -40,72 +46,98 @@ public class HumanoidArticulationAgent : Agent
         startPosition = pelvis.transform.position;
         startRotation = pelvis.transform.rotation;
 
-        startDriveTargets.Clear();
+        standingPoseTargets.Clear();
 
         foreach (var joint in controllableJoints)
         {
-            if (joint == null)
+            if (joint == null || joint.isRoot)
                 continue;
 
             ArticulationDrive drive = joint.xDrive;
 
+            drive.stiffness = 100000f;
+            drive.damping = 5000f;
             drive.forceLimit = forceLimit;
+
             joint.jointFriction = friction;
             joint.xDrive = drive;
 
-            // IMPORTANT: store INITIAL motor target (not jointPosition!)
-            startDriveTargets.Add(drive.target);
+            standingPoseTargets.Add(drive.target);
         }
-
-        Debug.Log($"Found {controllableJoints.Count} controllable joints");
     }
 
     public override void OnEpisodeBegin()
     {
-        ResetRobot();
+        target.position = startPosition + new Vector3(
+            Random.Range(-spawnRadius, spawnRadius),
+            0f,
+            Random.Range(-spawnRadius, spawnRadius));
 
-        target.position =
-            startPosition +
-            new Vector3(
-                Random.Range(-spawnRadius, spawnRadius),
-                0,
-                Random.Range(-spawnRadius, spawnRadius));
+
 
         UpdateOrientationObjects();
+
+        StartCoroutine(ResetCoroutine());
     }
 
-    void ResetRobot()
+    IEnumerator ResetCoroutine()
     {
-        // 1. Disable physics simulation temporarily (IMPORTANT)
-        pelvis.enabled = false;
-
-        // 2. Reset root
+        // Hard teleport root (DO NOT disable object)
         pelvis.TeleportRoot(startPosition, startRotation);
 
-        // 3. Clear velocities (root)
         pelvis.linearVelocity = Vector3.zero;
         pelvis.angularVelocity = Vector3.zero;
 
-        // 4. Reset ALL joints properly
-        foreach (var joint in controllableJoints)
+        // let physics settle
+        for (int i = 0; i < 5; i++)
+            yield return new WaitForFixedUpdate();
+
+        int safeCount = 0;
+
+        // Reset joint drives safely
+        for (int i = 0; i < controllableJoints.Count; i++)
         {
-            if (joint == null)
+            var joint = controllableJoints[i];
+
+            if (joint == null || joint.isRoot)
                 continue;
 
-            joint.enabled = false;   // IMPORTANT: reset internal state
-
             joint.linearVelocity = Vector3.zero;
-            joint.angularVelocity = Vector3.zero;
+            //joint.jointVelocity = new ArticulationReducedSpace(0f);
+            switch (joint.dofCount)
+            {
+                case 1:
+                    joint.jointVelocity =
+                        new ArticulationReducedSpace(0f);
+                    break;
 
-            ArticulationDrive drive = joint.xDrive;
-            drive.target = 0f; // or startDriveTargets if you want
+                case 2:
+                    joint.jointVelocity =
+                        new ArticulationReducedSpace(0f, 0f);
+                    break;
+
+                case 3:
+                    joint.jointVelocity =
+                        new ArticulationReducedSpace(0f, 0f, 0f);
+                    break;
+            }
+
+            var drive = joint.xDrive;
+            drive.target = standingPoseTargets[safeCount];
+            drive.targetVelocity = 0f;
             joint.xDrive = drive;
 
-            joint.enabled = true;    // re-enable rebuilds articulation state
+            safeCount++;
         }
 
-        // 5. Re-enable root LAST (important order)
-        pelvis.enabled = true;
+        pelvis.linearVelocity = Vector3.zero;
+        pelvis.angularVelocity = Vector3.zero;
+
+        // extra stabilization frames
+        for (int i = 0; i < 3; i++)
+            yield return new WaitForFixedUpdate();
+
+        Physics.SyncTransforms();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -132,62 +164,103 @@ public class HumanoidArticulationAgent : Agent
 
         foreach (var joint in controllableJoints)
         {
-            if (joint.jointPosition.dofCount > 0)
-                sensor.AddObservation(joint.jointPosition[0]);
+            sensor.AddObservation(
+                joint.dofCount > 0 ? joint.jointPosition[0] : 0f);
 
-            if (joint.jointVelocity.dofCount > 0)
-                sensor.AddObservation(joint.jointVelocity[0]);
+            sensor.AddObservation(
+                joint.dofCount > 0 ? joint.jointVelocity[0] : 0f);
         }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        int actionIndex = 0;
+        int safeIndex = 0;
 
         foreach (var joint in controllableJoints)
         {
-            if (actionIndex >= actions.ContinuousActions.Length)
+            if (joint == null || joint.isRoot)
+                continue;
+
+            if (safeIndex >= actions.ContinuousActions.Length)
                 break;
 
-            float action =
-                Mathf.Clamp(actions.ContinuousActions[actionIndex++], -1f, 1f);
+            float action = Mathf.Clamp(actions.ContinuousActions[safeIndex], -1f, 1f);
 
-            ArticulationDrive drive = joint.xDrive;
+            var drive = joint.xDrive;
 
-            float targetAngle =
-                Mathf.Lerp(
-                    drive.lowerLimit,
-                    drive.upperLimit,
-                    (action + 1f) * 0.5f);
-
-            drive.target = targetAngle;
+            drive.target =
+                standingPoseTargets[safeIndex] + action * actionRange;
 
             joint.xDrive = drive;
+
+            safeIndex++;
         }
     }
+
+    //void FixedUpdate()
+    //{
+    //    UpdateOrientationObjects();
+
+    //    Vector3 toTarget =
+    //        (target.position - pelvis.transform.position).normalized;
+
+    //    float moveReward =
+    //        Vector3.Dot(pelvis.linearVelocity.normalized, toTarget);
+
+    //    if (!float.IsNaN(moveReward))
+    //        AddReward(moveReward * 0.005f);
+
+    //    float uprightReward =
+    //        Vector3.Dot(pelvis.transform.up, Vector3.up);
+
+    //    //AddReward(uprightReward * 0.002f);
+    //    AddReward(uprightReward * 0.002f);
+
+    //    float facingReward =
+    //        Vector3.Dot(pelvis.transform.forward, toTarget);
+
+    //    AddReward(Mathf.Max(0f, facingReward) * 0.002f);
+
+    //    float distance =
+    //        Vector3.Distance(pelvis.transform.position, target.position);
+
+    //    if (distance < targetRadius)
+    //    {
+    //        AddReward(2f);
+    //        EndEpisode();
+    //    }
+
+    //    if (uprightReward < 0.2f)
+    //    {
+    //        AddReward(-2f);
+    //        EndEpisode();
+    //    }
+
+    //    if (pelvis.transform.position.y < 0.2f)
+    //    {
+    //        AddReward(-1f);
+    //        EndEpisode();
+    //    }
+    //}
 
     void FixedUpdate()
     {
         UpdateOrientationObjects();
 
-        Vector3 toTarget =
-            (target.position - pelvis.transform.position).normalized;
+        Vector3 toTarget = (target.position - pelvis.transform.position).normalized;
+        float moveReward = Vector3.Dot(pelvis.linearVelocity.normalized, toTarget);
 
-        Vector3 velocity = pelvis.linearVelocity;
+        float uprightReward = Vector3.Dot(pelvis.transform.up, Vector3.up);
 
-        float moveReward =
-            Vector3.Dot(velocity.normalized, toTarget);
-
+        // Upright is a gate, not the main goal
         if (!float.IsNaN(moveReward))
-            AddReward(moveReward * 0.005f);
+            AddReward(moveReward * 0.02f);          // doubled
 
-        float uprightReward =
-            Vector3.Dot(pelvis.transform.up, Vector3.up);
+        AddReward(uprightReward * 0.003f);          // reduced
 
-        AddReward(uprightReward * 0.002f);
-
-        float distance =
-            Vector3.Distance(pelvis.transform.position, target.position);
+        // Reward getting closer to target (dense distance reward)
+        float distance = Vector3.Distance(pelvis.transform.position, target.position);
+        AddReward(-distance * 0.0001f);             // constant pull toward target
 
         if (distance < targetRadius)
         {
@@ -195,7 +268,7 @@ public class HumanoidArticulationAgent : Agent
             EndEpisode();
         }
 
-        if (uprightReward < 0.3f)
+        if (uprightReward < 0.2f)
         {
             AddReward(-1f);
             EndEpisode();
@@ -223,5 +296,11 @@ public class HumanoidArticulationAgent : Agent
 
         for (int i = 0; i < actions.Length; i++)
             actions[i] = 0f;
+    }
+
+    public void HandTouchedGround()
+    {
+        AddReward(-2f);
+        EndEpisode();
     }
 }
