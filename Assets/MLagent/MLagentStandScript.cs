@@ -127,7 +127,7 @@ public class HumanoidArticulationStandAgent : Agent
             }
         }
 
-        Debug.Log($"=== Totaal standingPoseTargets: {standingPoseTargets.Count} ===");
+        //Debug.Log($"=== Totaal standingPoseTargets: {standingPoseTargets.Count} ===");
     }
     //public override void Initialize()
     //{
@@ -327,8 +327,8 @@ public class HumanoidArticulationStandAgent : Agent
                 joint.xDrive = d;
 
                 // DEBUG: log elke joint die een actie krijgt
-                if (joint.name.Contains("knee") || joint.name.Contains("Knee"))
-                    Debug.Log($"{joint.name} | action={a:F3} | poseBase={standingPoseTargets[poseIndex]:F3} | newTarget={newTarget:F3} | xDrive.target na set={joint.xDrive.target:F3} | stiffness={joint.xDrive.stiffness} | driveType={joint.xDrive.driveType}");
+                //if (joint.name.Contains("knee") || joint.name.Contains("Knee"))
+                    //Debug.Log($"{joint.name} | action={a:F3} | poseBase={standingPoseTargets[poseIndex]:F3} | newTarget={newTarget:F3} | xDrive.target na set={joint.xDrive.target:F3} | stiffness={joint.xDrive.stiffness} | driveType={joint.xDrive.driveType}");
             }
             if (joint.dofCount >= 2 && actionIndex < actions.ContinuousActions.Length)
             {
@@ -445,13 +445,13 @@ public class HumanoidArticulationStandAgent : Agent
 
     void FixedUpdate()
     {
-        // DEBUG knie
-        foreach (var joint in controllableJoints)
-        {
-            if (joint == null) continue;
-            if (joint.name.Contains("knee") || joint.name.Contains("Knee"))
-                Debug.Log($"[FixedUpdate] {joint.name} | pos={joint.jointPosition[0]:F3} | vel={joint.jointVelocity[0]:F3} | driveTarget={joint.xDrive.target:F3} | stiffness={joint.xDrive.stiffness} | driveType={joint.xDrive.driveType}");
-        }
+        //// DEBUG knie
+        //foreach (var joint in controllableJoints)
+        //{
+        //    if (joint == null) continue;
+        //    if (joint.name.Contains("knee") || joint.name.Contains("Knee"))
+        //        Debug.Log($"[FixedUpdate] {joint.name} | pos={joint.jointPosition[0]:F3} | vel={joint.jointVelocity[0]:F3} | driveTarget={joint.xDrive.target:F3} | stiffness={joint.xDrive.stiffness} | driveType={joint.xDrive.driveType}");
+        //}
         UpdateOrientationObjects();
 
         Vector3 toTarget = (target.position - pelvis.transform.position).normalized;
@@ -461,7 +461,7 @@ public class HumanoidArticulationStandAgent : Agent
 
         //Upright is a gate, not the main goal
         if (!float.IsNaN(moveReward))
-            AddReward(moveReward * 0.02f);          // doubled
+            AddReward(moveReward * 0.0f);          // doubled
 
         AddReward(uprightReward * 0.05f);          // reduced
 
@@ -473,7 +473,7 @@ public class HumanoidArticulationStandAgent : Agent
 
         //Reward getting closer to target(dense distance reward)
         float distance = Vector3.Distance(pelvis.transform.position, target.position);
-        AddReward(-distance * 0.01f);             // constant pull toward target
+        AddReward(-distance * 0.0f);             // constant pull toward target
 
         if (distance < targetRadius)
         {
@@ -483,7 +483,7 @@ public class HumanoidArticulationStandAgent : Agent
 
         if (uprightReward < 0.3f)
         {
-            AddReward(-10f);
+            AddReward(-20f);
             EndEpisode();
         }
 
@@ -495,7 +495,7 @@ public class HumanoidArticulationStandAgent : Agent
 
         if (pelvis.transform.position.y < 0.2f)
         {
-            AddReward(-1f);
+            AddReward(-2f);
             EndEpisode();
         }
     }
