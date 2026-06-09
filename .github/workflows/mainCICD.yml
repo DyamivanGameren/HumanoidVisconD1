@@ -18,7 +18,6 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneWindows64
-          - StandaloneLinux64
 
     steps:
       - name: Checkout repository
