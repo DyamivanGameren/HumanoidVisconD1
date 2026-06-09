@@ -1,3 +1,4 @@
+
 name: Unity CI Pipeline
 
 on:
@@ -5,19 +6,14 @@ on:
   pull_request:
 
 permissions:
+  actions: read
   contents: read
   security-events: write
 
 jobs:
   build:
-    name: Build Unity - ${{ matrix.targetPlatform }}
+    name: Build Unity - Windows
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        targetPlatform:
-          - StandaloneWindows64
 
     steps:
       - name: Checkout repository
@@ -26,6 +22,15 @@ jobs:
           fetch-depth: 0
           lfs: true
 
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-StandaloneWindows64-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-${{ runner.os }}-StandaloneWindows64-
+            Library-${{ runner.os }}-
+
       - name: Build Unity project
         uses: game-ci/unity-builder@v4
         env:
@@ -33,7 +38,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
+          targetPlatform: StandaloneWindows64
 
   sast:
     name: SAST - CodeQL
@@ -56,3 +61,4 @@ jobs:
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:csharp"
+
