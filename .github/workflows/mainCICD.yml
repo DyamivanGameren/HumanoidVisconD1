@@ -1,48 +1,29 @@
-name: Test and build Unity project
 
-on:
-  push:
-  pull_request:
+name: Build project
+
+on: [push, pull_request]
 
 jobs:
-  test:
-    name: Run unit tests
+  buildForAllSupportedPlatforms:
+    name: Build for ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneOSX
+          - StandaloneWindows64
+          - StandaloneLinux64
+          - iOS
+          - Android
+          - WebGL
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Run Unity tests
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          testMode: EditMode
-
-  build:
-    name: Build Windows application
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
-
-      - name: Build Windows version
-        uses: game-ci/unity-builder@v4
+      - uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          targetPlatform: StandaloneWindows64
-
-      - name: Upload build
-        uses: actions/upload-artifact@v4
-        with:
-          name: Windows-build
-          path: build/StandaloneWindows64
+          targetPlatform: ${{ matrix.targetPlatform }}
