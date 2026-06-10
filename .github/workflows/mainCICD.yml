@@ -1,4 +1,3 @@
-
 name: Unity CI Pipeline
 
 on:
@@ -62,3 +61,28 @@ jobs:
         with:
           category: "/language:csharp"
 
+  sca:
+    name: SCA - Snyk Open Source
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Run Snyk SCA scan
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk test --all-projects --severity-threshold=high --sarif-file-output=snyk-sca.sarif
+
+      - name: Upload Snyk SCA results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: snyk-sca.sarif
