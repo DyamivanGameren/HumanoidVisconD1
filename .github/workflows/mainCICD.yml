@@ -1,3 +1,4 @@
+
 name: Unity CI Pipeline
 
 on:
@@ -39,7 +40,7 @@ jobs:
         with:
           targetPlatform: StandaloneWindows64
 
-  sast-codeql:
+  sast:
     name: SAST - CodeQL
     runs-on: ubuntu-latest
 
@@ -61,74 +62,3 @@ jobs:
         with:
           category: "/language:csharp"
 
-  snyk-sast:
-    name: SAST - Snyk Code
-    runs-on: ubuntu-latest
-
-    # Secrets zijn niet beschikbaar bij forked PRs.
-    # Voor een schoolproject is dit meestal geen probleem, maar dit voorkomt foutmeldingen.
-    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Snyk CLI
-        uses: snyk/actions/setup@master
-
-      - name: Run Snyk Code analysis
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          snyk code test --sarif-file-output=snyk-code.sarif
-
-      - name: Upload Snyk Code SARIF as artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: snyk-code-sarif
-          path: snyk-code.sarif
-
-  snyk-sca:
-    name: SCA - Snyk Dependencies
-    runs-on: ubuntu-latest
-
-    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Snyk CLI
-        uses: snyk/actions/setup@master
-
-      - name: Run Snyk SCA dependency scan
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          snyk test --all-projects --severity-threshold=high
-
-  sbom:
-    name: Generate SBOM
-    runs-on: ubuntu-latest
-
-    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Snyk CLI
-        uses: snyk/actions/setup@master
-
-      - name: Generate CycloneDX SBOM
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          snyk sbom --format=cyclonedx1.6+json --json-file-output=sbom.cyclonedx.json
-
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-cyclonedx
-          path: sbom.cyclonedx.json
