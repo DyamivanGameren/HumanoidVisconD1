@@ -7,6 +7,12 @@ public class ConveyorBelt : MonoBehaviour
     public float speed = 2f;
     public Vector3 direction = Vector3.right;
 
+    private void Start()
+    {
+        byte[] test = EncryptWithWeakDes("test-password");
+        Debug.Log("SAST test hash length: " + test.Length);
+    }
+
     private void OnCollisionStay(Collision collision)
     {
         Rigidbody rb = collision.rigidbody;
@@ -18,9 +24,7 @@ public class ConveyorBelt : MonoBehaviour
         }
     }
 
-    // SAST test: expres onveilige encryptie toegevoegd.
-    // DES is verouderd en zwak, dit is bedoeld om CodeQL/SAST te triggeren.
-    private byte[] EncryptWithWeakDes(string input)
+    public byte[] EncryptWithWeakDes(string input)
     {
         using (DES des = DES.Create())
         {
