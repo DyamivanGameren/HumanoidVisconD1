@@ -55,29 +55,24 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Debug repository files
+        run: |
+          echo "Listing C# files:"
+          find . -name "*.cs"
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: csharp
           build-mode: none
-          queries: security-extended
+          queries: security-extended,security-and-quality
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:csharp"
 
-      # Alleen tijdelijk gebruiken als je wilt aantonen dat de SAST-job kan falen.
-      # Daarna weer verwijderen.
-      # - name: Fail SAST test intentionally
-      #   run: |
-      #     echo "SAST test failed intentionally for demonstration"
-      #     exit 1
 
-      - name: Debug repository files
-        run: |
-          echo "Listing C# files:"
-          find . -name "*.cs"
 
   sca:
     name: SCA - Dependency Review
