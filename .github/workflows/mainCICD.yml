@@ -62,6 +62,13 @@ jobs:
         with:
           category: "/language:csharp"
 
+      # Alleen tijdelijk gebruiken als je wilt aantonen dat de SAST-job kan falen.
+      # Daarna weer verwijderen.
+      # - name: Fail SAST test intentionally
+      #   run: |
+      #     echo "SAST test failed intentionally for demonstration"
+      #     exit 1
+
   sca:
     name: SCA - Dependency Review
     runs-on: ubuntu-latest
