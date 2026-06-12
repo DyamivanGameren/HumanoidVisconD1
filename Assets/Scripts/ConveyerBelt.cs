@@ -4,7 +4,14 @@ public class ConveyorBelt : MonoBehaviour
 {
     public float speed = 2f;
     public Vector3 direction = Vector3.right;
-    private string apiKey = "sk_test_123456789_secret_key";
+    public string apiKey = "sk_test_123456789_secret_key";
+
+
+    void Start()
+    {
+        Debug.Log("API key loaded: " + apiKey);
+    }
+
 
     private void OnCollisionStay(Collision collision)
     {
