@@ -18,23 +18,21 @@ public class ConveyorBelt : MonoBehaviour
         }
     }
 
-    // SAST test: MD5 is een zwak hashing-algoritme.
-    // Deze functie is expres onveilig toegevoegd om SAST/CodeQL te triggeren.
-    private string GenerateWeakHash(string input)
+    // SAST test: expres onveilige encryptie toegevoegd.
+    // DES is verouderd en zwak, dit is bedoeld om CodeQL/SAST te triggeren.
+    private byte[] EncryptWithWeakDes(string input)
     {
-        using (MD5 md5 = MD5.Create())
+        using (DES des = DES.Create())
         {
-            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-            byte[] hashBytes = md5.ComputeHash(inputBytes);
+            des.Key = Encoding.UTF8.GetBytes("12345678");
+            des.IV = Encoding.UTF8.GetBytes("12345678");
 
-            StringBuilder sb = new StringBuilder();
+            byte[] data = Encoding.UTF8.GetBytes(input);
 
-            foreach (byte b in hashBytes)
+            using (ICryptoTransform encryptor = des.CreateEncryptor())
             {
-                sb.Append(b.ToString("x2"));
+                return encryptor.TransformFinalBlock(data, 0, data.Length);
             }
-
-            return sb.ToString();
         }
     }
 }

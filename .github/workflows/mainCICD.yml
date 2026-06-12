@@ -69,10 +69,15 @@ jobs:
 
       # Alleen tijdelijk gebruiken als je wilt aantonen dat de SAST-job kan falen.
       # Daarna weer verwijderen.
-      - name: Fail SAST test intentionally
+      # - name: Fail SAST test intentionally
+      #   run: |
+      #     echo "SAST test failed intentionally for demonstration"
+      #     exit 1
+
+      - name: Debug repository files
         run: |
-          echo "SAST test failed intentionally for demonstration"
-          exit 1
+          echo "Listing C# files:"
+          find . -name "*.cs"
 
   sca:
     name: SCA - Dependency Review
