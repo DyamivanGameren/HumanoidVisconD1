@@ -1,19 +1,31 @@
 using UnityEngine;
-using System.Data.SqlClient;
 
 public class ConveyorBelt : MonoBehaviour
+
 {
-    void Start()
+
+    public float speed = 2f;
+
+    public Vector3 direction = Vector3.right;
+
+
+    private void OnCollisionStay(Collision collision)
+
     {
-        string username = "admin' OR '1'='1";
 
-        SqlConnection conn = new SqlConnection("Server=localhost;Database=test;Trusted_Connection=True;");
-        conn.Open();
+        Rigidbody rb = collision.rigidbody;
 
-        // SAST trigger: SQL query met string concatenation
-        string query = "SELECT * FROM Users WHERE username = '" + username + "'";
 
-        SqlCommand cmd = new SqlCommand(query, conn);
-        cmd.ExecuteReader();
+        if (rb != null)
+
+        {
+
+            Vector3 moveDirection = transform.TransformDirection(direction.normalized);
+
+            rb.MovePosition(rb.position + moveDirection * speed * Time.fixedDeltaTime);
+
+        }
+
     }
+
 }
