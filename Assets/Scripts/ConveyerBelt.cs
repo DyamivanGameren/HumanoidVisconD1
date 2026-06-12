@@ -5,11 +5,14 @@ public class ConveyorBelt : MonoBehaviour
     public float speed = 2f;
     public Vector3 direction = Vector3.right;
     public string apiKey = "sk_test_123456789_secret_key";
+    string query = "SELECT * FROM Users WHERE username = @username";
 
 
     void Start()
     {
         Debug.Log("API key loaded: " + apiKey);
+        SqlCommand cmd = new SqlCommand(query, conn);
+        cmd.Parameters.AddWithValue("@username", username);
     }
 
 
