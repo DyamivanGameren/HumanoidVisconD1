@@ -3059,7 +3059,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &151433659
 Transform:
   m_ObjectHideFlags: 0
@@ -16196,7 +16196,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: a3bb1ba4edc99044c8a01726cb467a22, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 39dcbad83a86c0347a6eb1edece2c3ee, type: 3}
   m_InferenceDevice: 2
   m_BehaviorType: 0
   m_BehaviorName: humanoidwalking
@@ -22986,7 +22986,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1101741035
 Transform:
   m_ObjectHideFlags: 0
