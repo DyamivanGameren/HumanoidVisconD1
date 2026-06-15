@@ -10913,7 +10913,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 98
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 29
@@ -26938,7 +26938,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 98
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 29
@@ -36979,14 +36979,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 98
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 29
       BranchSizes: 01000000
     VectorActionSize: 
     VectorActionDescriptions: []
-    VectorActionSpaceType: 0
+    VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
@@ -43738,7 +43738,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 98
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 29
@@ -55496,7 +55496,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 98
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 29
@@ -105886,7 +105886,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 98
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 29
@@ -134738,7 +134738,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 98
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 29
@@ -139480,7 +139480,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 98
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 29

@@ -7,31 +7,58 @@
     "G1Phase1Stand": {
         "checkpoints": [
             {
-                "steps": 499998,
-                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-499998.onnx",
-                "reward": null,
-                "creation_time": 1781557979.679893,
+                "steps": 999944,
+                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-999944.onnx",
+                "reward": 50.90069103240967,
+                "creation_time": 1781560448.955738,
                 "auxillary_file_paths": [
-                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-499998.pt"
+                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-999944.pt"
                 ]
             },
             {
-                "steps": 995684,
-                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-995684.onnx",
-                "reward": 94.55972248315811,
-                "creation_time": 1781559730.2083004,
+                "steps": 1006429,
+                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1006429.onnx",
+                "reward": 105.76671612262726,
+                "creation_time": 1781560475.1188507,
                 "auxillary_file_paths": [
-                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-995684.pt"
+                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1006429.pt"
+                ]
+            },
+            {
+                "steps": 1042746,
+                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1042746.onnx",
+                "reward": 120.47763904929161,
+                "creation_time": 1781561193.2000003,
+                "auxillary_file_paths": [
+                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1042746.pt"
+                ]
+            },
+            {
+                "steps": 1044816,
+                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1044816.onnx",
+                "reward": 10.271972278753916,
+                "creation_time": 1781561224.8293,
+                "auxillary_file_paths": [
+                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1044816.pt"
+                ]
+            },
+            {
+                "steps": 1210094,
+                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1210094.onnx",
+                "reward": null,
+                "creation_time": 1781561862.9620407,
+                "auxillary_file_paths": [
+                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1210094.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 995684,
+            "steps": 1210094,
             "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand.onnx",
-            "reward": 94.55972248315811,
-            "creation_time": 1781559730.2083004,
+            "reward": null,
+            "creation_time": 1781561862.9620407,
             "auxillary_file_paths": [
-                "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-995684.pt"
+                "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-1210094.pt"
             ]
         }
     }
