@@ -3,5 +3,36 @@
         "stats_format_version": "0.3.0",
         "mlagents_version": "1.1.0",
         "torch_version": "2.12.0+cpu"
+    },
+    "G1Phase1Stand": {
+        "checkpoints": [
+            {
+                "steps": 499998,
+                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-499998.onnx",
+                "reward": null,
+                "creation_time": 1781557979.679893,
+                "auxillary_file_paths": [
+                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-499998.pt"
+                ]
+            },
+            {
+                "steps": 995684,
+                "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-995684.onnx",
+                "reward": 94.55972248315811,
+                "creation_time": 1781559730.2083004,
+                "auxillary_file_paths": [
+                    "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-995684.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 995684,
+            "file_path": "results\\g1_phase1_standV2\\G1Phase1Stand.onnx",
+            "reward": 94.55972248315811,
+            "creation_time": 1781559730.2083004,
+            "auxillary_file_paths": [
+                "results\\g1_phase1_standV2\\G1Phase1Stand\\G1Phase1Stand-995684.pt"
+            ]
+        }
     }
 }
