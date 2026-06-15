@@ -3,48 +3,47 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
+using Unity.Robotics.UrdfImporter.Control;
 using UnityEngine;
 
 [RequireComponent(typeof(BehaviorParameters))]
 public class G1Phase1StandAgent : Agent
 {
-    [Header("Robot setup")]
+    [Header("URDF setup")]
+    [SerializeField] private bool addUrdfControlHelpers = true;
     [SerializeField] private bool logDetectedJoints = true;
 
     [Header("Joint control")]
-    [Tooltip("Maximum target change per decision step, in degrees.")]
-    [SerializeField] private float actionStepDegrees = 0.75f;
+    [SerializeField] private float actionStepDegrees = 0.5f;
+    [SerializeField] private float maxDeviationFromStartDegrees = 15f;
 
-    [SerializeField] private float jointStiffness = 3000f;
-    [SerializeField] private float jointDamping = 160f;
-    [SerializeField] private float jointForceLimit = 300f;
+    [SerializeField] private float jointStiffness = 100f;
+    [SerializeField] private float jointDamping = 0f;
+    [SerializeField] private float jointForceLimit = 100f;
     [SerializeField] private float jointFriction = 10f;
+    [SerializeField] private float angularDamping = 10f;
 
     [Header("Standing target")]
-    [Tooltip("Expected pelvis/root height while standing.")]
     [SerializeField] private float desiredRootHeight = 0.78f;
-
-    [Tooltip("Episode ends below this height.")]
     [SerializeField] private float minimumRootHeight = 0.38f;
 
-    [Tooltip("Episode ends if root up dot world up becomes lower than this.")]
     [Range(-1f, 1f)]
     [SerializeField] private float minimumUprightness = 0.25f;
 
     [Header("Rewards")]
     [SerializeField] private float aliveRewardPerSecond = 0.8f;
-    [SerializeField] private float uprightReward = 0.004f;
-    [SerializeField] private float heightReward = 0.003f;
-    [SerializeField] private float poseReward = 0.002f;
+    [SerializeField] private float uprightReward = 0.008f;
+    [SerializeField] private float heightReward = 0.008f;
+    [SerializeField] private float poseReward = 0.004f;
     [SerializeField] private float stillnessPenalty = 0.00008f;
-    [SerializeField] private float actionPenalty = 0.00003f;
+    [SerializeField] private float actionPenalty = 0.00008f;
     [SerializeField] private float fallPenalty = -1f;
 
     [Header("Episode reset")]
     [SerializeField] private int rewardGraceDecisionSteps = 5;
-    [SerializeField] private bool randomizeStartPose = true;
-    [SerializeField] private float randomYawDegrees = 5f;
-    [SerializeField] private float randomTiltDegrees = 3f;
+    [SerializeField] private bool randomizeStartPose = false;
+    [SerializeField] private float randomYawDegrees = 0f;
+    [SerializeField] private float randomTiltDegrees = 0f;
 
     private readonly List<ArticulationBody> controlledJoints = new();
     private readonly List<float> initialTargets = new();
@@ -58,20 +57,20 @@ public class G1Phase1StandAgent : Agent
     private int decisionStepsSinceReset;
     private bool initialized;
 
-    public int ControlledJointCount => controlledJoints.Count;
-
     public override void Initialize()
     {
         rootBody = GetComponent<ArticulationBody>();
 
         if (rootBody == null)
         {
-            Debug.LogError(
-                "Put G1Phase1StandAgent on the root ArticulationBody, usually the pelvis.",
-                this);
-
+            Debug.LogError("Put G1Phase1StandAgent on the root ArticulationBody, usually pelvis.", this);
             enabled = false;
             return;
+        }
+
+        if (addUrdfControlHelpers)
+        {
+            AddUrdfHelpersLikeControllerScript();
         }
 
         allBodies = GetComponentsInChildren<ArticulationBody>(true);
@@ -86,10 +85,42 @@ public class G1Phase1StandAgent : Agent
         initialized = true;
 
         Debug.Log(
-            $"G1 Phase 1 standing agent ready. Bodies: {allBodies.Length}, " +
+            $"G1Phase1StandAgent ready. Bodies: {allBodies.Length}, " +
             $"controlled joints/actions: {controlledJoints.Count}, " +
             $"observations: {GetObservationSize()}",
             this);
+    }
+
+    private void AddUrdfHelpersLikeControllerScript()
+    {
+        if (GetComponent<FKRobot>() == null)
+        {
+            gameObject.AddComponent<FKRobot>();
+        }
+
+        ArticulationBody[] bodies = GetComponentsInChildren<ArticulationBody>(true);
+
+        foreach (ArticulationBody body in bodies)
+        {
+            if (body.GetComponent<JointControl>() == null)
+            {
+                body.gameObject.AddComponent<JointControl>();
+            }
+
+            JointControl jointControl = body.GetComponent<JointControl>();
+            jointControl.controltype = ControlType.PositionControl;
+            jointControl.direction = RotationDirection.None;
+
+            body.jointFriction = jointFriction;
+            body.angularDamping = angularDamping;
+            body.useGravity = true;
+
+            ArticulationDrive drive = body.xDrive;
+            drive.stiffness = jointStiffness;
+            drive.damping = jointDamping;
+            drive.forceLimit = jointForceLimit;
+            body.xDrive = drive;
+        }
     }
 
     private void FindControlledJoints()
@@ -111,10 +142,7 @@ public class G1Phase1StandAgent : Agent
             if (body.jointType != ArticulationJointType.RevoluteJoint &&
                 body.jointType != ArticulationJointType.PrismaticJoint)
             {
-                Debug.LogWarning(
-                    $"Skipping '{body.name}' because joint type {body.jointType} may have multiple DOF.",
-                    body);
-
+                Debug.LogWarning($"Skipping {body.name}, joint type {body.jointType} may have multiple DOF.", body);
                 continue;
             }
 
@@ -123,9 +151,7 @@ public class G1Phase1StandAgent : Agent
             if (logDetectedJoints)
             {
                 ArticulationDrive drive = body.xDrive;
-                Debug.Log(
-                    $"Controlled joint: {body.name}, limits {drive.lowerLimit:F1} to {drive.upperLimit:F1}",
-                    body);
+                Debug.Log($"Controlled joint: {body.name}, limits {drive.lowerLimit:F1} to {drive.upperLimit:F1}", body);
             }
         }
     }
@@ -135,20 +161,17 @@ public class G1Phase1StandAgent : Agent
         foreach (ArticulationBody body in allBodies)
         {
             body.useGravity = true;
-            body.linearDamping = 0.02f;
-            body.angularDamping = 0.05f;
+            body.jointFriction = jointFriction;
+            body.angularDamping = angularDamping;
         }
 
         foreach (ArticulationBody joint in controlledJoints)
         {
             ArticulationDrive drive = joint.xDrive;
-
             drive.stiffness = jointStiffness;
             drive.damping = jointDamping;
             drive.forceLimit = jointForceLimit;
-
             joint.xDrive = drive;
-            joint.jointFriction = jointFriction;
         }
     }
 
@@ -172,9 +195,7 @@ public class G1Phase1StandAgent : Agent
         behaviorParameters.BrainParameters.ActionSpec =
             ActionSpec.MakeContinuous(controlledJoints.Count);
 
-        behaviorParameters.BrainParameters.VectorObservationSize =
-            GetObservationSize();
-
+        behaviorParameters.BrainParameters.VectorObservationSize = GetObservationSize();
         behaviorParameters.BrainParameters.NumStackedVectorObservations = 1;
     }
 
@@ -228,16 +249,18 @@ public class G1Phase1StandAgent : Agent
 
             drive.target = initialTargets[i];
             drive.targetVelocity = 0f;
-
             joint.xDrive = drive;
 
             if (joint.jointPosition.dofCount > 0)
             {
-                joint.jointPosition =
-                    new ArticulationReducedSpace(initialRawJointPositions[i]);
+                joint.jointPosition = new ArticulationReducedSpace(initialRawJointPositions[i]);
+                joint.jointVelocity = new ArticulationReducedSpace(0f);
+            }
 
-                joint.jointVelocity =
-                    new ArticulationReducedSpace(0f);
+            JointControl jointControl = joint.GetComponent<JointControl>();
+            if (jointControl != null)
+            {
+                jointControl.direction = RotationDirection.None;
             }
         }
     }
@@ -259,14 +282,9 @@ public class G1Phase1StandAgent : Agent
     {
         Transform root = rootBody.transform;
 
-        Vector3 localVelocity =
-            root.InverseTransformDirection(rootBody.linearVelocity);
-
-        Vector3 localAngularVelocity =
-            root.InverseTransformDirection(rootBody.angularVelocity);
-
-        Vector3 worldUpInRootSpace =
-            root.InverseTransformDirection(Vector3.up);
+        Vector3 localVelocity = root.InverseTransformDirection(rootBody.linearVelocity);
+        Vector3 localAngularVelocity = root.InverseTransformDirection(rootBody.angularVelocity);
+        Vector3 worldUpInRootSpace = root.InverseTransformDirection(Vector3.up);
 
         sensor.AddObservation(localVelocity / 5f);
         sensor.AddObservation(localAngularVelocity / 10f);
@@ -281,17 +299,9 @@ public class G1Phase1StandAgent : Agent
             float jointPosition = GetJointPosition(joint);
             float jointVelocity = GetJointVelocity(joint);
 
-            sensor.AddObservation(
-                NormalizeBetweenLimits(jointPosition, drive.lowerLimit, drive.upperLimit));
-
-            sensor.AddObservation(
-                Mathf.Clamp(jointVelocity / 10f, -1f, 1f));
-
-            sensor.AddObservation(
-                NormalizeTargetDifference(
-                    drive.target - jointPosition,
-                    drive.lowerLimit,
-                    drive.upperLimit));
+            sensor.AddObservation(NormalizeBetweenLimits(jointPosition, drive.lowerLimit, drive.upperLimit));
+            sensor.AddObservation(Mathf.Clamp(jointVelocity / 10f, -1f, 1f));
+            sensor.AddObservation(NormalizeTargetDifference(drive.target - jointPosition, drive.lowerLimit, drive.upperLimit));
         }
     }
 
@@ -306,10 +316,7 @@ public class G1Phase1StandAgent : Agent
 
         if (actions.Length != controlledJoints.Count)
         {
-            Debug.LogError(
-                $"Action count mismatch. Got {actions.Length}, expected {controlledJoints.Count}.",
-                this);
-
+            Debug.LogError($"Action count mismatch. Got {actions.Length}, expected {controlledJoints.Count}.", this);
             EndEpisode();
             return;
         }
@@ -343,12 +350,25 @@ public class G1Phase1StandAgent : Agent
 
             drive.target += action * actionStepDegrees;
 
-            if (drive.upperLimit > drive.lowerLimit)
+            float lowerLimit = drive.lowerLimit;
+            float upperLimit = drive.upperLimit;
+
+            if (upperLimit > lowerLimit)
+            {
+                float startLimitedMin = initialTargets[i] - maxDeviationFromStartDegrees;
+                float startLimitedMax = initialTargets[i] + maxDeviationFromStartDegrees;
+
+                float finalMin = Mathf.Max(lowerLimit, startLimitedMin);
+                float finalMax = Mathf.Min(upperLimit, startLimitedMax);
+
+                drive.target = Mathf.Clamp(drive.target, finalMin, finalMax);
+            }
+            else
             {
                 drive.target = Mathf.Clamp(
                     drive.target,
-                    drive.lowerLimit,
-                    drive.upperLimit);
+                    initialTargets[i] - maxDeviationFromStartDegrees,
+                    initialTargets[i] + maxDeviationFromStartDegrees);
             }
 
             joint.xDrive = drive;
@@ -362,14 +382,10 @@ public class G1Phase1StandAgent : Agent
     {
         Transform root = rootBody.transform;
 
-        float uprightScore =
-            Mathf.Clamp01(Vector3.Dot(root.up, Vector3.up));
+        float uprightScore = Mathf.Clamp01(Vector3.Dot(root.up, Vector3.up));
 
-        float heightError =
-            Mathf.Abs(root.position.y - desiredRootHeight);
-
-        float heightScore =
-            Mathf.Clamp01(1f - heightError / Mathf.Max(desiredRootHeight, 0.01f));
+        float heightError = Mathf.Abs(root.position.y - desiredRootHeight);
+        float heightScore = Mathf.Clamp01(1f - heightError / Mathf.Max(desiredRootHeight, 0.01f));
 
         float poseScore = GetInitialPoseScore();
 
@@ -400,6 +416,7 @@ public class G1Phase1StandAgent : Agent
         {
             ArticulationBody joint = controlledJoints[i];
             ArticulationDrive drive = joint.xDrive;
+
             float range = Mathf.Max(Mathf.Abs(drive.upperLimit - drive.lowerLimit), 1f);
             float error = Mathf.Abs(GetJointPosition(joint) - initialTargets[i]);
 
@@ -476,10 +493,7 @@ public class G1Phase1StandAgent : Agent
             1f);
     }
 
-    private float NormalizeTargetDifference(
-        float difference,
-        float lowerLimit,
-        float upperLimit)
+    private float NormalizeTargetDifference(float difference, float lowerLimit, float upperLimit)
     {
         float range = Mathf.Abs(upperLimit - lowerLimit);
 
