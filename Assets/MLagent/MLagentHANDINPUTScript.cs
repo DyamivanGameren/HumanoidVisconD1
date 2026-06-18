@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.MLAgents;
@@ -6,7 +6,7 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgentsExamples;
 
-public class HumanoidArticulationAgent : Agent
+public class HumanoidArticulationHandAgent : Agent
 {
     [Header("Robot Root")]
     public GameObject robotRoot;
@@ -22,7 +22,7 @@ public class HumanoidArticulationAgent : Agent
     public DirectionIndicator directionIndicator;
 
     [Header("Joint Settings")]
-    public float forceLimit = 200f;
+    //public float forceLimit = 200f;
     public float friction = 10f;
 
     [Header("Training")]
@@ -69,7 +69,7 @@ public class HumanoidArticulationAgent : Agent
                 var d = joint.xDrive;
                 d.stiffness = 1000f;
                 d.damping = 50f;
-                d.forceLimit = forceLimit;
+                //d.forceLimit = forceLimit;
                 d.driveType = ArticulationDriveType.Acceleration;
                 //d.lowerLimit = -90f * Mathf.Deg2Rad;  // of gewoon in Inspector zetten
                 //d.upperLimit = 90f * Mathf.Deg2Rad;
@@ -89,7 +89,7 @@ public class HumanoidArticulationAgent : Agent
                 var d = joint.zDrive;
                 d.stiffness = 100000f;
                 d.damping = 5000f;
-                d.forceLimit = forceLimit;
+                //d.forceLimit = forceLimit;
                 d.driveType = ArticulationDriveType.Acceleration;
                 joint.zDrive = d;
             }
@@ -110,11 +110,11 @@ public class HumanoidArticulationAgent : Agent
 
     public override void OnEpisodeBegin()
     {
-        //target.position = startPosition + new Vector3(
-        //    Random.Range(-spawnRadius, spawnRadius),
-        //    0f,
-        //    Random.Range(-spawnRadius, spawnRadius));
-        target.position = startPosition + new Vector3(0f, 0f, 5f);
+        target.position = startPosition + new Vector3(
+            Random.Range(-spawnRadius, spawnRadius),
+            0f,
+            Random.Range(-spawnRadius, spawnRadius));
+        //target.position = startPosition + new Vector3(0f, 0f, 3f);
 
         UpdateOrientationObjects();
 
@@ -122,7 +122,7 @@ public class HumanoidArticulationAgent : Agent
 
     }
 
-    
+
 
     IEnumerator ResetCoroutine()
     {
@@ -242,17 +242,66 @@ public class HumanoidArticulationAgent : Agent
             }
 
             // TIJDELIJK: forceer maximale uitslag op knie
-            //if (joint.name.Contains("knee") || joint.name.Contains("Knee"))
-            //{
-            //    var d = joint.xDrive;
-            //    d.target = joint.xDrive.upperLimit; // ga naar max limiet
-            //    joint.xDrive = d;
-            //    Debug.Log($"Forceer {joint.name} naar upperLimit={joint.xDrive.upperLimit:F4}");
-            //    poseIndex += joint.dofCount;
-            //    Debug.Log($"{joint.name} | mass={joint.mass} | immovable={joint.immovable}");
-            //    continue;
+            if (joint.name.Contains("knee") || joint.name.Contains("Knee"))
+            {
+                var d = joint.xDrive;
+                //d.target = joint.xDrive.upperLimit; // ga naar max limiet
+                d.target = 20f;
+                joint.xDrive = d;
+                Debug.Log($"Forceer {joint.name} naar upperLimit={joint.xDrive.upperLimit:F4}");
+                poseIndex += joint.dofCount;
+                Debug.Log($"{joint.name} | mass={joint.mass} | immovable={joint.immovable}");
+                continue;
 
-            //}
+            }
+            if (joint.name.Contains("ankle_pitch"))
+            {
+                var d = joint.xDrive;
+                //d.target = joint.xDrive.upperLimit; // ga naar max limiet
+                d.target = 0f;
+                joint.xDrive = d;
+                Debug.Log($"Forceer {joint.name} naar upperLimit={joint.xDrive.upperLimit:F4}");
+                poseIndex += joint.dofCount;
+                Debug.Log($"{joint.name} | mass={joint.mass} | immovable={joint.immovable}");
+                continue;
+
+            }
+            if (joint.name.Contains("ankle_roll"))
+            {
+                var d = joint.xDrive;
+                //d.target = joint.xDrive.upperLimit; // ga naar max limiet
+                d.target = 0f;
+                joint.xDrive = d;
+                Debug.Log($"Forceer {joint.name} naar upperLimit={joint.xDrive.upperLimit:F4}");
+                poseIndex += joint.dofCount;
+                Debug.Log($"{joint.name} | mass={joint.mass} | immovable={joint.immovable}");
+                continue;
+
+            }
+            if (joint.name.Contains("hip_pitch"))
+            {
+                var d = joint.xDrive;
+                //d.target = joint.xDrive.upperLimit; // ga naar max limiet
+                d.target = -20f;
+                joint.xDrive = d;
+                Debug.Log($"Forceer {joint.name} naar upperLimit={joint.xDrive.upperLimit:F4}");
+                poseIndex += joint.dofCount;
+                Debug.Log($"{joint.name} | mass={joint.mass} | immovable={joint.immovable}");
+                continue;
+
+            }
+            if (joint.name.Contains("torso_link"))
+            {
+                var d = joint.xDrive;
+                //d.target = joint.xDrive.upperLimit; // ga naar max limiet
+                d.target = -10f;
+                joint.xDrive = d;
+                Debug.Log($"Forceer {joint.name} naar upperLimit={joint.xDrive.upperLimit:F4}");
+                poseIndex += joint.dofCount;
+                Debug.Log($"{joint.name} | mass={joint.mass} | immovable={joint.immovable}");
+                continue;
+
+            }
             //if (joint.name.Contains("waist") || joint.name.Contains("Waist"))
             //{
             //    var d = joint.xDrive;
@@ -268,7 +317,7 @@ public class HumanoidArticulationAgent : Agent
             poseIndex += joint.dofCount;
         }
     }
-   
+
 
     void FixedUpdate()
     {
@@ -289,9 +338,9 @@ public class HumanoidArticulationAgent : Agent
 
         //Upright is a gate, not the main goal
         if (!float.IsNaN(moveReward))
-            AddReward(moveReward * 0.0001f);          
+            AddReward(moveReward * 0.0001f);
 
-        AddReward(pelvisuprightReward * 0.05f);          
+        AddReward(pelvisuprightReward * 0.05f);
 
         float facingReward =
     Vector3.Dot(pelvis.transform.forward, toTarget);
@@ -309,7 +358,7 @@ public class HumanoidArticulationAgent : Agent
             EndEpisode();
         }
 
-        if (torsouprightReward < 0.8f) 
+        if (torsouprightReward < 0.1f)
         {
             AddReward(-2f);
             EndEpisode();
@@ -327,7 +376,7 @@ public class HumanoidArticulationAgent : Agent
             EndEpisode();
         }
 
-        if (pelvis.transform.position.y < 0.6f)
+        if (pelvis.transform.position.y < 0.1f)
         {
             AddReward(-20f);
             EndEpisode();
