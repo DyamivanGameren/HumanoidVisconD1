@@ -1,0 +1,47 @@
+{
+    "humanoidrobot2": {
+        "checkpoints": [
+            {
+                "steps": 499999,
+                "file_path": "results\\humanoid2\\humanoidrobot2\\humanoidrobot2-499999.onnx",
+                "reward": -0.6770589259838817,
+                "creation_time": 1780679053.6530719,
+                "auxillary_file_paths": [
+                    "results\\humanoid2\\humanoidrobot2\\humanoidrobot2-499999.pt"
+                ]
+            },
+            {
+                "steps": 896522,
+                "file_path": "results\\humanoid2\\humanoidrobot2\\humanoidrobot2-896522.onnx",
+                "reward": -0.6570215022815671,
+                "creation_time": 1780680637.379888,
+                "auxillary_file_paths": [
+                    "results\\humanoid2\\humanoidrobot2\\humanoidrobot2-896522.pt"
+                ]
+            },
+            {
+                "steps": 915783,
+                "file_path": "results\\humanoid2\\humanoidrobot2\\humanoidrobot2-915783.onnx",
+                "reward": -0.6792542775778502,
+                "creation_time": 1780681910.8713565,
+                "auxillary_file_paths": [
+                    "results\\humanoid2\\humanoidrobot2\\humanoidrobot2-915783.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 915783,
+            "file_path": "results\\humanoid2\\humanoidrobot2.onnx",
+            "reward": -0.6792542775778502,
+            "creation_time": 1780681910.8713565,
+            "auxillary_file_paths": [
+                "results\\humanoid2\\humanoidrobot2\\humanoidrobot2-915783.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

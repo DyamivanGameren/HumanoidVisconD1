@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - robot
+  - target
+  - agent
+  - k_Ground
   layers:
   - Default
   - TransparentFX
