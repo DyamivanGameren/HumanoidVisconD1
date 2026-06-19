@@ -3,15 +3,34 @@ using UnityEngine;
 
 public class SpawnerV2 : MonoBehaviour
 {
-    [Header("Prefab")]
     public GameObject prefabToSpawn;
 
-    [Header("Spawn Settings")]
     public int spawnAmount = 1;
-    public float spawnInterval = 2f;
+    public float spawnInterval = 30f;
     public float objectMass = 1f;
 
-    private IEnumerator Start()
+    private Coroutine spawnRoutine;
+
+    public void StartSpawning()
+    {
+        if (spawnRoutine == null)
+        {
+            spawnRoutine = StartCoroutine(SpawnLoop());
+            Debug.Log("Spawner gestart");
+        }
+    }
+
+    public void StopSpawning()
+    {
+        if (spawnRoutine != null)
+        {
+            StopCoroutine(spawnRoutine);
+            spawnRoutine = null;
+            Debug.Log("Spawner gestopt");
+        }
+    }
+
+    private IEnumerator SpawnLoop()
     {
         while (true)
         {
