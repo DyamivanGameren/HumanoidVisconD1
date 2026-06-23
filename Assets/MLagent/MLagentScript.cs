@@ -289,7 +289,7 @@ public class HumanoidArticulationAgent : Agent
 
         //Upright is a gate, not the main goal
         if (!float.IsNaN(moveReward))
-            AddReward(moveReward * 0.0001f);          
+            AddReward(moveReward * 0.001f);          
 
         AddReward(pelvisuprightReward * 0.05f);          
 
@@ -301,11 +301,11 @@ public class HumanoidArticulationAgent : Agent
 
         //Reward getting closer to target(dense distance reward)
         float distance = Vector3.Distance(pelvis.transform.position, target.position);
-        AddReward(-distance * 0.001f);             // constant pull toward target
+        AddReward(-distance * 0.01f);             // constant pull toward target
 
         if (distance < targetRadius)
         {
-            AddReward(5f);
+            AddReward(500f);
             EndEpisode();
         }
 
